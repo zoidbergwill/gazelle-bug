@@ -1,0 +1,2457 @@
+commit 0435d22063d5af8b29346f4030772cf9836779a3
+Author: zoidbergwill <zoidbergwill@users.noreply.github.com>
+Date:   Thu Apr 9 15:45:58 2020 +0200
+
+    gazelle
+
+diff --git a/pkg/api/apitesting/BUILD.bazel b/pkg/api/apitesting/BUILD.bazel
+new file mode 100644
+index 0000000..be04895
+--- /dev/null
++++ b/pkg/api/apitesting/BUILD.bazel
+@@ -0,0 +1,14 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["codec.go"],
++    importpath = "k8s.io/apimachinery/pkg/api/apitesting",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/runtime/serializer:go_default_library",
++        "//pkg/runtime/serializer/recognizer:go_default_library",
++    ],
++)
+diff --git a/pkg/api/apitesting/fuzzer/BUILD.bazel b/pkg/api/apitesting/fuzzer/BUILD.bazel
+new file mode 100644
+index 0000000..32fab7b
+--- /dev/null
++++ b/pkg/api/apitesting/fuzzer/BUILD.bazel
+@@ -0,0 +1,21 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "fuzzer.go",
++        "valuefuzz.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/api/apitesting/fuzzer",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/runtime/serializer:go_default_library",
++        "@com_github_google_gofuzz//:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["valuefuzz_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/api/apitesting/naming/BUILD.bazel b/pkg/api/apitesting/naming/BUILD.bazel
+new file mode 100644
+index 0000000..2422fe2
+--- /dev/null
++++ b/pkg/api/apitesting/naming/BUILD.bazel
+@@ -0,0 +1,14 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["naming.go"],
++    importpath = "k8s.io/apimachinery/pkg/api/apitesting/naming",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/util/errors:go_default_library",
++        "//pkg/util/sets:go_default_library",
++    ],
++)
+diff --git a/pkg/api/apitesting/roundtrip/BUILD.bazel b/pkg/api/apitesting/roundtrip/BUILD.bazel
+new file mode 100644
+index 0000000..f4e9add
+--- /dev/null
++++ b/pkg/api/apitesting/roundtrip/BUILD.bazel
+@@ -0,0 +1,32 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "compatibility.go",
++        "roundtrip.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/api/apitesting/roundtrip",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/api/apitesting:go_default_library",
++        "//pkg/api/apitesting/fuzzer:go_default_library",
++        "//pkg/api/equality:go_default_library",
++        "//pkg/api/meta:go_default_library",
++        "//pkg/apis/meta/fuzzer:go_default_library",
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/runtime/serializer:go_default_library",
++        "//pkg/runtime/serializer/json:go_default_library",
++        "//pkg/runtime/serializer/protobuf:go_default_library",
++        "//pkg/util/diff:go_default_library",
++        "//pkg/util/intstr:go_default_library",
++        "//pkg/util/sets:go_default_library",
++        "@com_github_davecgh_go_spew//spew:go_default_library",
++        "@com_github_golang_protobuf//proto:go_default_library",
++        "@com_github_google_go_cmp//cmp:go_default_library",
++        "@com_github_google_gofuzz//:go_default_library",
++        "@com_github_spf13_pflag//:go_default_library",
++    ],
++)
+diff --git a/pkg/api/equality/BUILD.bazel b/pkg/api/equality/BUILD.bazel
+new file mode 100644
+index 0000000..ffd420e
+--- /dev/null
++++ b/pkg/api/equality/BUILD.bazel
+@@ -0,0 +1,15 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["semantic.go"],
++    importpath = "k8s.io/apimachinery/pkg/api/equality",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/api/resource:go_default_library",
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/conversion:go_default_library",
++        "//pkg/fields:go_default_library",
++        "//pkg/labels:go_default_library",
++    ],
++)
+diff --git a/pkg/api/errors/BUILD.bazel b/pkg/api/errors/BUILD.bazel
+new file mode 100644
+index 0000000..2053dc6
+--- /dev/null
++++ b/pkg/api/errors/BUILD.bazel
+@@ -0,0 +1,29 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "doc.go",
++        "errors.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/api/errors",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/util/validation/field:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["errors_test.go"],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/util/validation/field:go_default_library",
++    ],
++)
+diff --git a/pkg/api/meta/BUILD.bazel b/pkg/api/meta/BUILD.bazel
+new file mode 100644
+index 0000000..4085842
+--- /dev/null
++++ b/pkg/api/meta/BUILD.bazel
+@@ -0,0 +1,47 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "doc.go",
++        "errors.go",
++        "firsthit_restmapper.go",
++        "help.go",
++        "interfaces.go",
++        "lazy.go",
++        "meta.go",
++        "multirestmapper.go",
++        "priority.go",
++        "restmapper.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/api/meta",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/conversion:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/types:go_default_library",
++        "//pkg/util/errors:go_default_library",
++        "//pkg/util/sets:go_default_library",
++        "@io_k8s_klog//:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "meta_test.go",
++        "multirestmapper_test.go",
++        "priority_test.go",
++        "restmapper_test.go",
++    ],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/apis/meta/v1beta1:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/util/diff:go_default_library",
++        "@com_github_google_gofuzz//:go_default_library",
++    ],
++)
+diff --git a/pkg/api/meta/table/BUILD.bazel b/pkg/api/meta/table/BUILD.bazel
+new file mode 100644
+index 0000000..6da345e
+--- /dev/null
++++ b/pkg/api/meta/table/BUILD.bazel
+@@ -0,0 +1,14 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["table.go"],
++    importpath = "k8s.io/apimachinery/pkg/api/meta/table",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/api/meta:go_default_library",
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/util/duration:go_default_library",
++    ],
++)
+diff --git a/pkg/api/meta/testrestmapper/BUILD.bazel b/pkg/api/meta/testrestmapper/BUILD.bazel
+new file mode 100644
+index 0000000..873bc85
+--- /dev/null
++++ b/pkg/api/meta/testrestmapper/BUILD.bazel
+@@ -0,0 +1,14 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["test_restmapper.go"],
++    importpath = "k8s.io/apimachinery/pkg/api/meta/testrestmapper",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/api/meta:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/util/sets:go_default_library",
++    ],
++)
+diff --git a/pkg/api/resource/BUILD.bazel b/pkg/api/resource/BUILD.bazel
+new file mode 100644
+index 0000000..a449f6f
+--- /dev/null
++++ b/pkg/api/resource/BUILD.bazel
+@@ -0,0 +1,54 @@
++load("@rules_proto//proto:defs.bzl", "proto_library")
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
++
++proto_library(
++    name = "resource_proto",
++    srcs = ["generated.proto"],
++    import_prefix = "k8s.io/apimachinery/",
++    visibility = ["//visibility:public"],
++)
++
++go_proto_library(
++    name = "resource_go_proto",
++    importpath = "k8s.io/apimachinery/pkg/api/resource",
++    proto = ":resource_proto",
++    visibility = ["//visibility:public"],
++)
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "amount.go",
++        "math.go",
++        "quantity.go",
++        "quantity_proto.go",
++        "scale_int.go",
++        "suffix.go",
++        "zz_generated.deepcopy.go",
++    ],
++    embed = [":resource_go_proto"],
++    importpath = "k8s.io/apimachinery/pkg/api/resource",
++    visibility = ["//visibility:public"],
++    deps = [
++        "@com_github_gogo_protobuf//proto:go_default_library",
++        "@in_gopkg_inf_v0//:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "amount_test.go",
++        "math_test.go",
++        "quantity_example_test.go",
++        "quantity_proto_test.go",
++        "quantity_test.go",
++        "scale_int_test.go",
++    ],
++    embed = [":go_default_library"],
++    deps = [
++        "@com_github_google_gofuzz//:go_default_library",
++        "@in_gopkg_inf_v0//:go_default_library",
++    ],
++)
+diff --git a/pkg/api/validation/BUILD.bazel b/pkg/api/validation/BUILD.bazel
+new file mode 100644
+index 0000000..0c3186f
+--- /dev/null
++++ b/pkg/api/validation/BUILD.bazel
+@@ -0,0 +1,32 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "doc.go",
++        "generic.go",
++        "objectmeta.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/api/validation",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/api/equality:go_default_library",
++        "//pkg/api/meta:go_default_library",
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/apis/meta/v1/validation:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/util/sets:go_default_library",
++        "//pkg/util/validation:go_default_library",
++        "//pkg/util/validation/field:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["objectmeta_test.go"],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/util/validation/field:go_default_library",
++    ],
++)
+diff --git a/pkg/api/validation/path/BUILD.bazel b/pkg/api/validation/path/BUILD.bazel
+new file mode 100644
+index 0000000..015ea6c
+--- /dev/null
++++ b/pkg/api/validation/path/BUILD.bazel
+@@ -0,0 +1,14 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["name.go"],
++    importpath = "k8s.io/apimachinery/pkg/api/validation/path",
++    visibility = ["//visibility:public"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["name_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/apis/meta/fuzzer/BUILD.bazel b/pkg/apis/meta/fuzzer/BUILD.bazel
+new file mode 100644
+index 0000000..a166fe3
+--- /dev/null
++++ b/pkg/apis/meta/fuzzer/BUILD.bazel
+@@ -0,0 +1,19 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["fuzzer.go"],
++    importpath = "k8s.io/apimachinery/pkg/apis/meta/fuzzer",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/api/apitesting:go_default_library",
++        "//pkg/api/apitesting/fuzzer:go_default_library",
++        "//pkg/api/resource:go_default_library",
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/apis/meta/v1beta1:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/serializer:go_default_library",
++        "//pkg/types:go_default_library",
++        "@com_github_google_gofuzz//:go_default_library",
++    ],
++)
+diff --git a/pkg/apis/meta/internalversion/BUILD.bazel b/pkg/apis/meta/internalversion/BUILD.bazel
+new file mode 100644
+index 0000000..28086a1
+--- /dev/null
++++ b/pkg/apis/meta/internalversion/BUILD.bazel
+@@ -0,0 +1,23 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "doc.go",
++        "register.go",
++        "types.go",
++        "zz_generated.conversion.go",
++        "zz_generated.deepcopy.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/apis/meta/internalversion",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/apis/meta/v1beta1:go_default_library",
++        "//pkg/conversion:go_default_library",
++        "//pkg/fields:go_default_library",
++        "//pkg/labels:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++    ],
++)
+diff --git a/pkg/apis/meta/internalversion/scheme/BUILD.bazel b/pkg/apis/meta/internalversion/scheme/BUILD.bazel
+new file mode 100644
+index 0000000..b674760
+--- /dev/null
++++ b/pkg/apis/meta/internalversion/scheme/BUILD.bazel
+@@ -0,0 +1,33 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "doc.go",
++        "register.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/apis/meta/internalversion/scheme",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/internalversion:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/serializer:go_default_library",
++        "//pkg/util/runtime:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "register_test.go",
++        "roundtrip_test.go",
++    ],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/api/apitesting/roundtrip:go_default_library",
++        "//pkg/apis/meta/fuzzer:go_default_library",
++        "//pkg/apis/meta/internalversion:go_default_library",
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/util/diff:go_default_library",
++    ],
++)
+diff --git a/pkg/apis/meta/v1/BUILD.bazel b/pkg/apis/meta/v1/BUILD.bazel
+new file mode 100644
+index 0000000..c94daa4
+--- /dev/null
++++ b/pkg/apis/meta/v1/BUILD.bazel
+@@ -0,0 +1,95 @@
++load("@rules_proto//proto:defs.bzl", "proto_library")
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
++
++proto_library(
++    name = "v1_proto",
++    srcs = ["generated.proto"],
++    import_prefix = "k8s.io/apimachinery/",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/runtime:runtime_proto",
++        "//pkg/runtime/schema:schema_proto",
++    ],
++)
++
++go_proto_library(
++    name = "v1_go_proto",
++    importpath = "k8s.io/apimachinery/pkg/apis/meta/v1",
++    proto = ":v1_proto",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++    ],
++)
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "controller_ref.go",
++        "conversion.go",
++        "deepcopy.go",
++        "doc.go",
++        "duration.go",
++        "group_version.go",
++        "helpers.go",
++        "labels.go",
++        "meta.go",
++        "micro_time.go",
++        "micro_time_proto.go",
++        "register.go",
++        "time.go",
++        "time_proto.go",
++        "types.go",
++        "types_swagger_doc_generated.go",
++        "watch.go",
++        "zz_generated.conversion.go",
++        "zz_generated.deepcopy.go",
++        "zz_generated.defaults.go",
++    ],
++    embed = [":v1_go_proto"],
++    importpath = "k8s.io/apimachinery/pkg/apis/meta/v1",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/api/resource:go_default_library",
++        "//pkg/conversion:go_default_library",
++        "//pkg/fields:go_default_library",
++        "//pkg/labels:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/selection:go_default_library",
++        "//pkg/types:go_default_library",
++        "//pkg/util/intstr:go_default_library",
++        "//pkg/util/runtime:go_default_library",
++        "//pkg/watch:go_default_library",
++        "@com_github_google_gofuzz//:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "controller_ref_test.go",
++        "conversion_test.go",
++        "duration_test.go",
++        "group_version_test.go",
++        "helpers_test.go",
++        "labels_test.go",
++        "micro_time_test.go",
++        "options_test.go",
++        "time_test.go",
++        "types_test.go",
++    ],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/api/equality:go_default_library",
++        "//pkg/labels:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/runtime/serializer/json:go_default_library",
++        "//pkg/types:go_default_library",
++        "//pkg/util/diff:go_default_library",
++        "@com_github_google_gofuzz//:go_default_library",
++        "@io_k8s_sigs_yaml//:go_default_library",
++    ],
++)
+diff --git a/pkg/apis/meta/v1/unstructured/BUILD.bazel b/pkg/apis/meta/v1/unstructured/BUILD.bazel
+new file mode 100644
+index 0000000..9b33cf1
+--- /dev/null
++++ b/pkg/apis/meta/v1/unstructured/BUILD.bazel
+@@ -0,0 +1,44 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "helpers.go",
++        "unstructured.go",
++        "unstructured_list.go",
++        "zz_generated.deepcopy.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/types:go_default_library",
++        "//pkg/util/json:go_default_library",
++        "//pkg/util/runtime:go_default_library",
++        "@io_k8s_klog//:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "helpers_test.go",
++        "unstructured_list_test.go",
++        "unstructured_test.go",
++    ],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/api/apitesting/fuzzer:go_default_library",
++        "//pkg/api/equality:go_default_library",
++        "//pkg/apis/meta/fuzzer:go_default_library",
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/serializer:go_default_library",
++        "//pkg/runtime/testing:go_default_library",
++        "//pkg/util/diff:go_default_library",
++        "@com_github_stretchr_testify//assert:go_default_library",
++        "@com_github_stretchr_testify//require:go_default_library",
++    ],
++)
+diff --git a/pkg/apis/meta/v1/unstructured/unstructuredscheme/BUILD.bazel b/pkg/apis/meta/v1/unstructured/unstructuredscheme/BUILD.bazel
+new file mode 100644
+index 0000000..18b31d9
+--- /dev/null
++++ b/pkg/apis/meta/v1/unstructured/unstructuredscheme/BUILD.bazel
+@@ -0,0 +1,16 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["scheme.go"],
++    importpath = "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured/unstructuredscheme",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/v1/unstructured:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/runtime/serializer:go_default_library",
++        "//pkg/runtime/serializer/json:go_default_library",
++        "//pkg/runtime/serializer/versioning:go_default_library",
++    ],
++)
+diff --git a/pkg/apis/meta/v1/validation/BUILD.bazel b/pkg/apis/meta/v1/validation/BUILD.bazel
+new file mode 100644
+index 0000000..bb2592a
+--- /dev/null
++++ b/pkg/apis/meta/v1/validation/BUILD.bazel
+@@ -0,0 +1,26 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["validation.go"],
++    importpath = "k8s.io/apimachinery/pkg/apis/meta/v1/validation",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/types:go_default_library",
++        "//pkg/util/sets:go_default_library",
++        "//pkg/util/validation:go_default_library",
++        "//pkg/util/validation/field:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["validation_test.go"],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/types:go_default_library",
++        "//pkg/util/validation/field:go_default_library",
++    ],
++)
+diff --git a/pkg/apis/meta/v1beta1/BUILD.bazel b/pkg/apis/meta/v1beta1/BUILD.bazel
+new file mode 100644
+index 0000000..943e2b2
+--- /dev/null
++++ b/pkg/apis/meta/v1beta1/BUILD.bazel
+@@ -0,0 +1,48 @@
++load("@rules_proto//proto:defs.bzl", "proto_library")
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
++
++proto_library(
++    name = "v1beta1_proto",
++    srcs = ["generated.proto"],
++    import_prefix = "k8s.io/apimachinery/",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/v1:v1_proto",
++        "//pkg/runtime/schema:schema_proto",
++    ],
++)
++
++go_proto_library(
++    name = "v1beta1_go_proto",
++    importpath = "k8s.io/apimachinery/pkg/apis/meta/v1beta1",
++    proto = ":v1beta1_proto",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++    ],
++)
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "conversion.go",
++        "deepcopy.go",
++        "doc.go",
++        "register.go",
++        "types.go",
++        "types_swagger_doc_generated.go",
++        "zz_generated.deepcopy.go",
++        "zz_generated.defaults.go",
++    ],
++    embed = [":v1beta1_go_proto"],
++    importpath = "k8s.io/apimachinery/pkg/apis/meta/v1beta1",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/conversion:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++    ],
++)
+diff --git a/pkg/apis/meta/v1beta1/validation/BUILD.bazel b/pkg/apis/meta/v1beta1/validation/BUILD.bazel
+new file mode 100644
+index 0000000..dcafc72
+--- /dev/null
++++ b/pkg/apis/meta/v1beta1/validation/BUILD.bazel
+@@ -0,0 +1,12 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["validation.go"],
++    importpath = "k8s.io/apimachinery/pkg/apis/meta/v1beta1/validation",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/util/validation/field:go_default_library",
++    ],
++)
+diff --git a/pkg/apis/testapigroup/BUILD.bazel b/pkg/apis/testapigroup/BUILD.bazel
+new file mode 100644
+index 0000000..fbe22e7
+--- /dev/null
++++ b/pkg/apis/testapigroup/BUILD.bazel
+@@ -0,0 +1,18 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "doc.go",
++        "register.go",
++        "types.go",
++        "zz_generated.deepcopy.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/apis/testapigroup",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++    ],
++)
+diff --git a/pkg/apis/testapigroup/fuzzer/BUILD.bazel b/pkg/apis/testapigroup/fuzzer/BUILD.bazel
+new file mode 100644
+index 0000000..701a544
+--- /dev/null
++++ b/pkg/apis/testapigroup/fuzzer/BUILD.bazel
+@@ -0,0 +1,17 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["fuzzer.go"],
++    importpath = "k8s.io/apimachinery/pkg/apis/testapigroup/fuzzer",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/api/apitesting:go_default_library",
++        "//pkg/api/apitesting/fuzzer:go_default_library",
++        "//pkg/apis/testapigroup:go_default_library",
++        "//pkg/apis/testapigroup/v1:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/serializer:go_default_library",
++        "@com_github_google_gofuzz//:go_default_library",
++    ],
++)
+diff --git a/pkg/apis/testapigroup/install/BUILD.bazel b/pkg/apis/testapigroup/install/BUILD.bazel
+new file mode 100644
+index 0000000..c4cefdf
+--- /dev/null
++++ b/pkg/apis/testapigroup/install/BUILD.bazel
+@@ -0,0 +1,24 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["install.go"],
++    importpath = "k8s.io/apimachinery/pkg/apis/testapigroup/install",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/testapigroup:go_default_library",
++        "//pkg/apis/testapigroup/v1:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/util/runtime:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["roundtrip_test.go"],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/api/apitesting/roundtrip:go_default_library",
++        "//pkg/apis/testapigroup/fuzzer:go_default_library",
++    ],
++)
+diff --git a/pkg/apis/testapigroup/v1/BUILD.bazel b/pkg/apis/testapigroup/v1/BUILD.bazel
+new file mode 100644
+index 0000000..053c290
+--- /dev/null
++++ b/pkg/apis/testapigroup/v1/BUILD.bazel
+@@ -0,0 +1,51 @@
++load("@rules_proto//proto:defs.bzl", "proto_library")
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
++
++proto_library(
++    name = "v1_proto",
++    srcs = ["generated.proto"],
++    import_prefix = "k8s.io/apimachinery/",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/v1:v1_proto",
++        "//pkg/runtime:runtime_proto",
++        "//pkg/runtime/schema:schema_proto",
++    ],
++)
++
++go_proto_library(
++    name = "v1_go_proto",
++    importpath = "k8s.io/apimachinery/pkg/apis/testapigroup/v1",
++    proto = ":v1_proto",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++    ],
++)
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "conversion.go",
++        "defaults.go",
++        "doc.go",
++        "register.go",
++        "types.go",
++        "zz_generated.conversion.go",
++        "zz_generated.deepcopy.go",
++        "zz_generated.defaults.go",
++    ],
++    embed = [":v1_go_proto"],
++    importpath = "k8s.io/apimachinery/pkg/apis/testapigroup/v1",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/apis/testapigroup:go_default_library",
++        "//pkg/conversion:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++    ],
++)
+diff --git a/pkg/conversion/BUILD.bazel b/pkg/conversion/BUILD.bazel
+new file mode 100644
+index 0000000..6a1787c
+--- /dev/null
++++ b/pkg/conversion/BUILD.bazel
+@@ -0,0 +1,28 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "converter.go",
++        "deep_equal.go",
++        "doc.go",
++        "helper.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/conversion",
++    visibility = ["//visibility:public"],
++    deps = ["//third_party/forked/golang/reflect:go_default_library"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "converter_test.go",
++        "helper_test.go",
++    ],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/util/diff:go_default_library",
++        "@com_github_google_gofuzz//:go_default_library",
++        "@com_github_spf13_pflag//:go_default_library",
++    ],
++)
+diff --git a/pkg/conversion/queryparams/BUILD.bazel b/pkg/conversion/queryparams/BUILD.bazel
+new file mode 100644
+index 0000000..15ee14f
+--- /dev/null
++++ b/pkg/conversion/queryparams/BUILD.bazel
+@@ -0,0 +1,21 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "convert.go",
++        "doc.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/conversion/queryparams",
++    visibility = ["//visibility:public"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["convert_test.go"],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++    ],
++)
+diff --git a/pkg/conversion/unstructured/BUILD.bazel b/pkg/conversion/unstructured/BUILD.bazel
+new file mode 100644
+index 0000000..96b7926
+--- /dev/null
++++ b/pkg/conversion/unstructured/BUILD.bazel
+@@ -0,0 +1,16 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_test")
++
++go_test(
++    name = "go_default_test",
++    srcs = ["unstructured_conversion_test.go"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/apis/meta/v1/unstructured:go_default_library",
++        "//pkg/apis/testapigroup:go_default_library",
++        "//pkg/apis/testapigroup/v1:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/test:go_default_library",
++        "@com_github_stretchr_testify//assert:go_default_library",
++    ],
++)
+diff --git a/pkg/fields/BUILD.bazel b/pkg/fields/BUILD.bazel
+new file mode 100644
+index 0000000..c9910d4
+--- /dev/null
++++ b/pkg/fields/BUILD.bazel
+@@ -0,0 +1,23 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "doc.go",
++        "fields.go",
++        "requirements.go",
++        "selector.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/fields",
++    visibility = ["//visibility:public"],
++    deps = ["//pkg/selection:go_default_library"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "fields_test.go",
++        "selector_test.go",
++    ],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/labels/BUILD.bazel b/pkg/labels/BUILD.bazel
+new file mode 100644
+index 0000000..b1f39bc
+--- /dev/null
++++ b/pkg/labels/BUILD.bazel
+@@ -0,0 +1,32 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "doc.go",
++        "labels.go",
++        "selector.go",
++        "zz_generated.deepcopy.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/labels",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/selection:go_default_library",
++        "//pkg/util/sets:go_default_library",
++        "//pkg/util/validation:go_default_library",
++        "@io_k8s_klog//:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "labels_test.go",
++        "selector_test.go",
++    ],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/selection:go_default_library",
++        "//pkg/util/sets:go_default_library",
++    ],
++)
+diff --git a/pkg/runtime/BUILD.bazel b/pkg/runtime/BUILD.bazel
+new file mode 100644
+index 0000000..db6ae83
+--- /dev/null
++++ b/pkg/runtime/BUILD.bazel
+@@ -0,0 +1,86 @@
++load("@rules_proto//proto:defs.bzl", "proto_library")
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
++
++proto_library(
++    name = "runtime_proto",
++    srcs = ["generated.proto"],
++    import_prefix = "k8s.io/apimachinery/",
++    visibility = ["//visibility:public"],
++)
++
++go_proto_library(
++    name = "runtime_go_proto",
++    importpath = "k8s.io/apimachinery/pkg/runtime",
++    proto = ":runtime_proto",
++    visibility = ["//visibility:public"],
++)
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "codec.go",
++        "codec_check.go",
++        "conversion.go",
++        "converter.go",
++        "doc.go",
++        "embedded.go",
++        "error.go",
++        "extension.go",
++        "helper.go",
++        "interfaces.go",
++        "mapper.go",
++        "negotiate.go",
++        "register.go",
++        "scheme.go",
++        "scheme_builder.go",
++        "swagger_doc_generator.go",
++        "types.go",
++        "types_proto.go",
++        "zz_generated.deepcopy.go",
++    ],
++    embed = [":runtime_go_proto"],
++    importpath = "k8s.io/apimachinery/pkg/runtime",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/conversion:go_default_library",
++        "//pkg/conversion/queryparams:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/util/errors:go_default_library",
++        "//pkg/util/json:go_default_library",
++        "//pkg/util/naming:go_default_library",
++        "//pkg/util/runtime:go_default_library",
++        "//pkg/util/sets:go_default_library",
++        "@io_k8s_klog//:go_default_library",
++        "@io_k8s_sigs_structured_merge_diff_v3//value:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "codec_test.go",
++        "conversion_test.go",
++        "converter_test.go",
++        "embedded_test.go",
++        "extension_test.go",
++        "local_scheme_test.go",
++        "mapper_test.go",
++        "scheme_test.go",
++        "swagger_doc_generator_test.go",
++    ],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/api/meta:go_default_library",
++        "//pkg/apis/meta/v1/unstructured:go_default_library",
++        "//pkg/conversion:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/runtime/serializer:go_default_library",
++        "//pkg/runtime/testing:go_default_library",
++        "//pkg/util/diff:go_default_library",
++        "//pkg/util/json:go_default_library",
++        "//pkg/util/runtime:go_default_library",
++        "@com_github_stretchr_testify//assert:go_default_library",
++        "@com_github_stretchr_testify//require:go_default_library",
++    ],
++)
+diff --git a/pkg/runtime/schema/BUILD.bazel b/pkg/runtime/schema/BUILD.bazel
+new file mode 100644
+index 0000000..4efddbf
+--- /dev/null
++++ b/pkg/runtime/schema/BUILD.bazel
+@@ -0,0 +1,34 @@
++load("@rules_proto//proto:defs.bzl", "proto_library")
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
++
++proto_library(
++    name = "schema_proto",
++    srcs = ["generated.proto"],
++    import_prefix = "k8s.io/apimachinery/",
++    visibility = ["//visibility:public"],
++)
++
++go_proto_library(
++    name = "schema_go_proto",
++    importpath = "k8s.io/apimachinery/pkg/runtime/schema",
++    proto = ":schema_proto",
++    visibility = ["//visibility:public"],
++)
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "group_version.go",
++        "interfaces.go",
++    ],
++    embed = [":schema_go_proto"],
++    importpath = "k8s.io/apimachinery/pkg/runtime/schema",
++    visibility = ["//visibility:public"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["group_version_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/runtime/serializer/BUILD.bazel b/pkg/runtime/serializer/BUILD.bazel
+new file mode 100644
+index 0000000..d10db85
+--- /dev/null
++++ b/pkg/runtime/serializer/BUILD.bazel
+@@ -0,0 +1,41 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "codec_factory.go",
++        "negotiated_codec.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/runtime/serializer",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/runtime/serializer/json:go_default_library",
++        "//pkg/runtime/serializer/protobuf:go_default_library",
++        "//pkg/runtime/serializer/recognizer:go_default_library",
++        "//pkg/runtime/serializer/versioning:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "codec_test.go",
++        "sparse_test.go",
++    ],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/api/equality:go_default_library",
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/conversion:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/runtime/serializer/testing:go_default_library",
++        "//pkg/util/diff:go_default_library",
++        "//pkg/util/runtime:go_default_library",
++        "@com_github_google_gofuzz//:go_default_library",
++        "@com_github_spf13_pflag//:go_default_library",
++        "@io_k8s_sigs_yaml//:go_default_library",
++    ],
++)
+diff --git a/pkg/runtime/serializer/json/BUILD.bazel b/pkg/runtime/serializer/json/BUILD.bazel
+new file mode 100644
+index 0000000..c72b94a
+--- /dev/null
++++ b/pkg/runtime/serializer/json/BUILD.bazel
+@@ -0,0 +1,39 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "json.go",
++        "meta.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/runtime/serializer/json",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/runtime/serializer/recognizer:go_default_library",
++        "//pkg/util/framer:go_default_library",
++        "//pkg/util/yaml:go_default_library",
++        "@com_github_json_iterator_go//:go_default_library",
++        "@com_github_modern_go_reflect2//:go_default_library",
++        "@io_k8s_klog//:go_default_library",
++        "@io_k8s_sigs_yaml//:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "json_limit_test.go",
++        "json_test.go",
++        "meta_test.go",
++    ],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/runtime/testing:go_default_library",
++        "//pkg/util/diff:go_default_library",
++        "//pkg/util/json:go_default_library",
++    ],
++)
+diff --git a/pkg/runtime/serializer/protobuf/BUILD.bazel b/pkg/runtime/serializer/protobuf/BUILD.bazel
+new file mode 100644
+index 0000000..5ee519e
+--- /dev/null
++++ b/pkg/runtime/serializer/protobuf/BUILD.bazel
+@@ -0,0 +1,30 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "doc.go",
++        "protobuf.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/runtime/serializer/protobuf",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/runtime/serializer/recognizer:go_default_library",
++        "//pkg/util/framer:go_default_library",
++        "@com_github_gogo_protobuf//proto:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["protobuf_test.go"],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/runtime/testing:go_default_library",
++    ],
++)
+diff --git a/pkg/runtime/serializer/recognizer/BUILD.bazel b/pkg/runtime/serializer/recognizer/BUILD.bazel
+new file mode 100644
+index 0000000..a15953e
+--- /dev/null
++++ b/pkg/runtime/serializer/recognizer/BUILD.bazel
+@@ -0,0 +1,12 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["recognizer.go"],
++    importpath = "k8s.io/apimachinery/pkg/runtime/serializer/recognizer",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++    ],
++)
+diff --git a/pkg/runtime/serializer/recognizer/testing/BUILD.bazel b/pkg/runtime/serializer/recognizer/testing/BUILD.bazel
+new file mode 100644
+index 0000000..587e2f8
+--- /dev/null
++++ b/pkg/runtime/serializer/recognizer/testing/BUILD.bazel
+@@ -0,0 +1,12 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_test")
++
++go_test(
++    name = "go_default_test",
++    srcs = ["recognizer_test.go"],
++    deps = [
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/runtime/serializer/json:go_default_library",
++        "//pkg/runtime/serializer/recognizer:go_default_library",
++    ],
++)
+diff --git a/pkg/runtime/serializer/streaming/BUILD.bazel b/pkg/runtime/serializer/streaming/BUILD.bazel
+new file mode 100644
+index 0000000..9b79c4b
+--- /dev/null
++++ b/pkg/runtime/serializer/streaming/BUILD.bazel
+@@ -0,0 +1,23 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["streaming.go"],
++    importpath = "k8s.io/apimachinery/pkg/runtime/serializer/streaming",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["streaming_test.go"],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/util/framer:go_default_library",
++    ],
++)
+diff --git a/pkg/runtime/serializer/testing/BUILD.bazel b/pkg/runtime/serializer/testing/BUILD.bazel
+new file mode 100644
+index 0000000..3b90e53
+--- /dev/null
++++ b/pkg/runtime/serializer/testing/BUILD.bazel
+@@ -0,0 +1,18 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "conversion.go",
++        "doc.go",
++        "types.go",
++        "zz_generated.deepcopy.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/runtime/serializer/testing",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/conversion:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++    ],
++)
+diff --git a/pkg/runtime/serializer/versioning/BUILD.bazel b/pkg/runtime/serializer/versioning/BUILD.bazel
+new file mode 100644
+index 0000000..bd92ea3
+--- /dev/null
++++ b/pkg/runtime/serializer/versioning/BUILD.bazel
+@@ -0,0 +1,31 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["versioning.go"],
++    importpath = "k8s.io/apimachinery/pkg/runtime/serializer/versioning",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/v1/unstructured:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "@io_k8s_klog//:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "versioning_test.go",
++        "versioning_unstructured_test.go",
++    ],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/apis/meta/v1/unstructured:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/runtime/testing:go_default_library",
++        "//pkg/util/diff:go_default_library",
++        "@com_github_stretchr_testify//assert:go_default_library",
++    ],
++)
+diff --git a/pkg/runtime/serializer/yaml/BUILD.bazel b/pkg/runtime/serializer/yaml/BUILD.bazel
+new file mode 100644
+index 0000000..cd80d70
+--- /dev/null
++++ b/pkg/runtime/serializer/yaml/BUILD.bazel
+@@ -0,0 +1,23 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["yaml.go"],
++    importpath = "k8s.io/apimachinery/pkg/runtime/serializer/yaml",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/util/yaml:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["yaml_test.go"],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/util/yaml:go_default_library",
++        "@io_k8s_sigs_yaml//:go_default_library",
++    ],
++)
+diff --git a/pkg/runtime/testing/BUILD.bazel b/pkg/runtime/testing/BUILD.bazel
+new file mode 100644
+index 0000000..35d114a
+--- /dev/null
++++ b/pkg/runtime/testing/BUILD.bazel
+@@ -0,0 +1,18 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "cacheable_object.go",
++        "doc.go",
++        "types.go",
++        "zz_generated.deepcopy.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/runtime/testing",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/util/json:go_default_library",
++    ],
++)
+diff --git a/pkg/selection/BUILD.bazel b/pkg/selection/BUILD.bazel
+new file mode 100644
+index 0000000..06ad0b9
+--- /dev/null
++++ b/pkg/selection/BUILD.bazel
+@@ -0,0 +1,8 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["operator.go"],
++    importpath = "k8s.io/apimachinery/pkg/selection",
++    visibility = ["//visibility:public"],
++)
+diff --git a/pkg/test/BUILD.bazel b/pkg/test/BUILD.bazel
+new file mode 100644
+index 0000000..7e4a72f
+--- /dev/null
++++ b/pkg/test/BUILD.bazel
+@@ -0,0 +1,51 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "util.go",
++        "zz_generated.deepcopy.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/test",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/apis/testapigroup:go_default_library",
++        "//pkg/apis/testapigroup/v1:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/runtime/serializer:go_default_library",
++        "//pkg/util/runtime:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "api_meta_help_test.go",
++        "api_meta_meta_test.go",
++        "apis_meta_v1_unstructed_unstructure_test.go",
++        "runtime_helper_test.go",
++        "runtime_serializer_protobuf_protobuf_test.go",
++        "runtime_unversioned_test.go",
++    ],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/api/apitesting:go_default_library",
++        "//pkg/api/equality:go_default_library",
++        "//pkg/api/meta:go_default_library",
++        "//pkg/apis/meta/fuzzer:go_default_library",
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/apis/meta/v1/unstructured:go_default_library",
++        "//pkg/apis/testapigroup:go_default_library",
++        "//pkg/apis/testapigroup/v1:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/runtime/serializer:go_default_library",
++        "//pkg/runtime/serializer/protobuf:go_default_library",
++        "//pkg/types:go_default_library",
++        "//pkg/util/diff:go_default_library",
++        "@com_github_google_gofuzz//:go_default_library",
++        "@com_github_stretchr_testify//require:go_default_library",
++    ],
++)
+diff --git a/pkg/types/BUILD.bazel b/pkg/types/BUILD.bazel
+new file mode 100644
+index 0000000..c3002cb
+--- /dev/null
++++ b/pkg/types/BUILD.bazel
+@@ -0,0 +1,14 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "doc.go",
++        "namespacedname.go",
++        "nodename.go",
++        "patch.go",
++        "uid.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/types",
++    visibility = ["//visibility:public"],
++)
+diff --git a/pkg/util/cache/BUILD.bazel b/pkg/util/cache/BUILD.bazel
+new file mode 100644
+index 0000000..770b67c
+--- /dev/null
++++ b/pkg/util/cache/BUILD.bazel
+@@ -0,0 +1,29 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "expiring.go",
++        "lruexpirecache.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/util/cache",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/util/clock:go_default_library",
++        "@com_github_hashicorp_golang_lru//:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "expiring_test.go",
++        "lruexpirecache_test.go",
++    ],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/util/clock:go_default_library",
++        "@com_github_golang_groupcache//lru:go_default_library",
++        "@com_github_google_uuid//:go_default_library",
++    ],
++)
+diff --git a/pkg/util/clock/BUILD.bazel b/pkg/util/clock/BUILD.bazel
+new file mode 100644
+index 0000000..a88f83b
+--- /dev/null
++++ b/pkg/util/clock/BUILD.bazel
+@@ -0,0 +1,14 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["clock.go"],
++    importpath = "k8s.io/apimachinery/pkg/util/clock",
++    visibility = ["//visibility:public"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["clock_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/util/diff/BUILD.bazel b/pkg/util/diff/BUILD.bazel
+new file mode 100644
+index 0000000..26c5780
+--- /dev/null
++++ b/pkg/util/diff/BUILD.bazel
+@@ -0,0 +1,18 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["diff.go"],
++    importpath = "k8s.io/apimachinery/pkg/util/diff",
++    visibility = ["//visibility:public"],
++    deps = [
++        "@com_github_davecgh_go_spew//spew:go_default_library",
++        "@com_github_google_go_cmp//cmp:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["diff_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/util/duration/BUILD.bazel b/pkg/util/duration/BUILD.bazel
+new file mode 100644
+index 0000000..b55d5bc
+--- /dev/null
++++ b/pkg/util/duration/BUILD.bazel
+@@ -0,0 +1,14 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["duration.go"],
++    importpath = "k8s.io/apimachinery/pkg/util/duration",
++    visibility = ["//visibility:public"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["duration_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/util/errors/BUILD.bazel b/pkg/util/errors/BUILD.bazel
+new file mode 100644
+index 0000000..90f144e
+--- /dev/null
++++ b/pkg/util/errors/BUILD.bazel
+@@ -0,0 +1,18 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "doc.go",
++        "errors.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/util/errors",
++    visibility = ["//visibility:public"],
++    deps = ["//pkg/util/sets:go_default_library"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["errors_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/util/framer/BUILD.bazel b/pkg/util/framer/BUILD.bazel
+new file mode 100644
+index 0000000..506b3e3
+--- /dev/null
++++ b/pkg/util/framer/BUILD.bazel
+@@ -0,0 +1,14 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["framer.go"],
++    importpath = "k8s.io/apimachinery/pkg/util/framer",
++    visibility = ["//visibility:public"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["framer_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/util/httpstream/BUILD.bazel b/pkg/util/httpstream/BUILD.bazel
+new file mode 100644
+index 0000000..6967c39
+--- /dev/null
++++ b/pkg/util/httpstream/BUILD.bazel
+@@ -0,0 +1,17 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "doc.go",
++        "httpstream.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/util/httpstream",
++    visibility = ["//visibility:public"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["httpstream_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/util/httpstream/spdy/BUILD.bazel b/pkg/util/httpstream/spdy/BUILD.bazel
+new file mode 100644
+index 0000000..fa68ddd
+--- /dev/null
++++ b/pkg/util/httpstream/spdy/BUILD.bazel
+@@ -0,0 +1,38 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "connection.go",
++        "roundtripper.go",
++        "upgrade.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/util/httpstream/spdy",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/api/errors:go_default_library",
++        "//pkg/apis/meta/v1:go_default_library",
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/serializer:go_default_library",
++        "//pkg/util/httpstream:go_default_library",
++        "//pkg/util/net:go_default_library",
++        "//pkg/util/runtime:go_default_library",
++        "//third_party/forked/golang/netutil:go_default_library",
++        "@com_github_docker_spdystream//:go_default_library",
++        "@io_k8s_klog//:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "connection_test.go",
++        "roundtripper_test.go",
++        "upgrade_test.go",
++    ],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/util/httpstream:go_default_library",
++        "@com_github_elazarl_goproxy//:go_default_library",
++    ],
++)
+diff --git a/pkg/util/intstr/BUILD.bazel b/pkg/util/intstr/BUILD.bazel
+new file mode 100644
+index 0000000..5517edc
+--- /dev/null
++++ b/pkg/util/intstr/BUILD.bazel
+@@ -0,0 +1,36 @@
++load("@rules_proto//proto:defs.bzl", "proto_library")
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
++
++proto_library(
++    name = "intstr_proto",
++    srcs = ["generated.proto"],
++    import_prefix = "k8s.io/apimachinery/",
++    visibility = ["//visibility:public"],
++)
++
++go_proto_library(
++    name = "intstr_go_proto",
++    importpath = "k8s.io/apimachinery/pkg/util/intstr",
++    proto = ":intstr_proto",
++    visibility = ["//visibility:public"],
++)
++
++go_library(
++    name = "go_default_library",
++    srcs = ["intstr.go"],
++    embed = [":intstr_go_proto"],
++    importpath = "k8s.io/apimachinery/pkg/util/intstr",
++    visibility = ["//visibility:public"],
++    deps = [
++        "@com_github_google_gofuzz//:go_default_library",
++        "@io_k8s_klog//:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["intstr_test.go"],
++    embed = [":go_default_library"],
++    deps = ["@io_k8s_sigs_yaml//:go_default_library"],
++)
+diff --git a/pkg/util/json/BUILD.bazel b/pkg/util/json/BUILD.bazel
+new file mode 100644
+index 0000000..10ddf76
+--- /dev/null
++++ b/pkg/util/json/BUILD.bazel
+@@ -0,0 +1,14 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["json.go"],
++    importpath = "k8s.io/apimachinery/pkg/util/json",
++    visibility = ["//visibility:public"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["json_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/util/jsonmergepatch/BUILD.bazel b/pkg/util/jsonmergepatch/BUILD.bazel
+new file mode 100644
+index 0000000..38ee535
+--- /dev/null
++++ b/pkg/util/jsonmergepatch/BUILD.bazel
+@@ -0,0 +1,25 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["patch.go"],
++    importpath = "k8s.io/apimachinery/pkg/util/jsonmergepatch",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/util/json:go_default_library",
++        "//pkg/util/mergepatch:go_default_library",
++        "@com_github_evanphx_json_patch//:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["patch_test.go"],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/util/json:go_default_library",
++        "@com_github_davecgh_go_spew//spew:go_default_library",
++        "@com_github_evanphx_json_patch//:go_default_library",
++        "@io_k8s_sigs_yaml//:go_default_library",
++    ],
++)
+diff --git a/pkg/util/mergepatch/BUILD.bazel b/pkg/util/mergepatch/BUILD.bazel
+new file mode 100644
+index 0000000..4b5c884
+--- /dev/null
++++ b/pkg/util/mergepatch/BUILD.bazel
+@@ -0,0 +1,21 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "errors.go",
++        "util.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/util/mergepatch",
++    visibility = ["//visibility:public"],
++    deps = [
++        "@com_github_davecgh_go_spew//spew:go_default_library",
++        "@io_k8s_sigs_yaml//:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["util_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/util/naming/BUILD.bazel b/pkg/util/naming/BUILD.bazel
+new file mode 100644
+index 0000000..26064ab
+--- /dev/null
++++ b/pkg/util/naming/BUILD.bazel
+@@ -0,0 +1,14 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["from_stack.go"],
++    importpath = "k8s.io/apimachinery/pkg/util/naming",
++    visibility = ["//visibility:public"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["from_stack_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/util/net/BUILD.bazel b/pkg/util/net/BUILD.bazel
+new file mode 100644
+index 0000000..3388e0e
+--- /dev/null
++++ b/pkg/util/net/BUILD.bazel
+@@ -0,0 +1,37 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "http.go",
++        "interface.go",
++        "port_range.go",
++        "port_split.go",
++        "util.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/util/net",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/util/sets:go_default_library",
++        "@io_k8s_klog//:go_default_library",
++        "@org_golang_x_net//http2:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "http_test.go",
++        "interface_test.go",
++        "port_range_test.go",
++        "port_split_test.go",
++        "util_test.go",
++    ],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/util/wait:go_default_library",
++        "@com_github_spf13_pflag//:go_default_library",
++        "@com_github_stretchr_testify//assert:go_default_library",
++        "@com_github_stretchr_testify//require:go_default_library",
++    ],
++)
+diff --git a/pkg/util/proxy/BUILD.bazel b/pkg/util/proxy/BUILD.bazel
+new file mode 100644
+index 0000000..2266124
+--- /dev/null
++++ b/pkg/util/proxy/BUILD.bazel
+@@ -0,0 +1,43 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "dial.go",
++        "doc.go",
++        "transport.go",
++        "upgradeaware.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/util/proxy",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/api/errors:go_default_library",
++        "//pkg/util/httpstream:go_default_library",
++        "//pkg/util/net:go_default_library",
++        "//pkg/util/runtime:go_default_library",
++        "//pkg/util/sets:go_default_library",
++        "//third_party/forked/golang/netutil:go_default_library",
++        "@com_github_mxk_go_flowrate//flowrate:go_default_library",
++        "@io_k8s_klog//:go_default_library",
++        "@org_golang_x_net//html:go_default_library",
++        "@org_golang_x_net//html/atom:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "dial_test.go",
++        "transport_test.go",
++        "upgradeaware_test.go",
++    ],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/util/diff:go_default_library",
++        "//pkg/util/httpstream:go_default_library",
++        "//pkg/util/net:go_default_library",
++        "@com_github_stretchr_testify//assert:go_default_library",
++        "@com_github_stretchr_testify//require:go_default_library",
++        "@org_golang_x_net//websocket:go_default_library",
++    ],
++)
+diff --git a/pkg/util/rand/BUILD.bazel b/pkg/util/rand/BUILD.bazel
+new file mode 100644
+index 0000000..68be93e
+--- /dev/null
++++ b/pkg/util/rand/BUILD.bazel
+@@ -0,0 +1,14 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["rand.go"],
++    importpath = "k8s.io/apimachinery/pkg/util/rand",
++    visibility = ["//visibility:public"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["rand_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/util/remotecommand/BUILD.bazel b/pkg/util/remotecommand/BUILD.bazel
+new file mode 100644
+index 0000000..bae2e41
+--- /dev/null
++++ b/pkg/util/remotecommand/BUILD.bazel
+@@ -0,0 +1,9 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["constants.go"],
++    importpath = "k8s.io/apimachinery/pkg/util/remotecommand",
++    visibility = ["//visibility:public"],
++    deps = ["//pkg/apis/meta/v1:go_default_library"],
++)
+diff --git a/pkg/util/runtime/BUILD.bazel b/pkg/util/runtime/BUILD.bazel
+new file mode 100644
+index 0000000..fa11cbf
+--- /dev/null
++++ b/pkg/util/runtime/BUILD.bazel
+@@ -0,0 +1,15 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["runtime.go"],
++    importpath = "k8s.io/apimachinery/pkg/util/runtime",
++    visibility = ["//visibility:public"],
++    deps = ["@io_k8s_klog//:go_default_library"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["runtime_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/util/sets/BUILD.bazel b/pkg/util/sets/BUILD.bazel
+new file mode 100644
+index 0000000..70da95d
+--- /dev/null
++++ b/pkg/util/sets/BUILD.bazel
+@@ -0,0 +1,22 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "byte.go",
++        "doc.go",
++        "empty.go",
++        "int.go",
++        "int32.go",
++        "int64.go",
++        "string.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/util/sets",
++    visibility = ["//visibility:public"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["set_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/util/sets/types/BUILD.bazel b/pkg/util/sets/types/BUILD.bazel
+new file mode 100644
+index 0000000..93e6322
+--- /dev/null
++++ b/pkg/util/sets/types/BUILD.bazel
+@@ -0,0 +1,8 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["types.go"],
++    importpath = "k8s.io/apimachinery/pkg/util/sets/types",
++    visibility = ["//visibility:public"],
++)
+diff --git a/pkg/util/strategicpatch/BUILD.bazel b/pkg/util/strategicpatch/BUILD.bazel
+new file mode 100644
+index 0000000..cc1e1bf
+--- /dev/null
++++ b/pkg/util/strategicpatch/BUILD.bazel
+@@ -0,0 +1,36 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "errors.go",
++        "meta.go",
++        "patch.go",
++        "types.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/util/strategicpatch",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/apis/meta/v1/unstructured:go_default_library",
++        "//pkg/util/json:go_default_library",
++        "//pkg/util/mergepatch:go_default_library",
++        "//third_party/forked/golang/json:go_default_library",
++        "@io_k8s_kube_openapi//pkg/util/proto:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["patch_test.go"],
++    data = glob(["testdata/**"]),
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/runtime:go_default_library",
++        "//pkg/util/json:go_default_library",
++        "//pkg/util/mergepatch:go_default_library",
++        "//pkg/util/sets:go_default_library",
++        "//pkg/util/strategicpatch/testing:go_default_library",
++        "@com_github_davecgh_go_spew//spew:go_default_library",
++        "@io_k8s_sigs_yaml//:go_default_library",
++    ],
++)
+diff --git a/pkg/util/strategicpatch/testing/BUILD.bazel b/pkg/util/strategicpatch/testing/BUILD.bazel
+new file mode 100644
+index 0000000..c07f654
+--- /dev/null
++++ b/pkg/util/strategicpatch/testing/BUILD.bazel
+@@ -0,0 +1,14 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["openapi.go"],
++    importpath = "k8s.io/apimachinery/pkg/util/strategicpatch/testing",
++    visibility = ["//visibility:public"],
++    deps = [
++        "@com_github_googleapis_gnostic//OpenAPIv2:go_default_library",
++        "@com_github_googleapis_gnostic//compiler:go_default_library",
++        "@in_gopkg_yaml_v2//:go_default_library",
++        "@io_k8s_kube_openapi//pkg/util/proto:go_default_library",
++    ],
++)
+diff --git a/pkg/util/uuid/BUILD.bazel b/pkg/util/uuid/BUILD.bazel
+new file mode 100644
+index 0000000..615fc63
+--- /dev/null
++++ b/pkg/util/uuid/BUILD.bazel
+@@ -0,0 +1,12 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["uuid.go"],
++    importpath = "k8s.io/apimachinery/pkg/util/uuid",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/types:go_default_library",
++        "@com_github_google_uuid//:go_default_library",
++    ],
++)
+diff --git a/pkg/util/validation/BUILD.bazel b/pkg/util/validation/BUILD.bazel
+new file mode 100644
+index 0000000..75bbf28
+--- /dev/null
++++ b/pkg/util/validation/BUILD.bazel
+@@ -0,0 +1,16 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["validation.go"],
++    importpath = "k8s.io/apimachinery/pkg/util/validation",
++    visibility = ["//visibility:public"],
++    deps = ["//pkg/util/validation/field:go_default_library"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["validation_test.go"],
++    embed = [":go_default_library"],
++    deps = ["//pkg/util/validation/field:go_default_library"],
++)
+diff --git a/pkg/util/validation/field/BUILD.bazel b/pkg/util/validation/field/BUILD.bazel
+new file mode 100644
+index 0000000..baf04b5
+--- /dev/null
++++ b/pkg/util/validation/field/BUILD.bazel
+@@ -0,0 +1,24 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "errors.go",
++        "path.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/util/validation/field",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/util/errors:go_default_library",
++        "//pkg/util/sets:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "errors_test.go",
++        "path_test.go",
++    ],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/util/version/BUILD.bazel b/pkg/util/version/BUILD.bazel
+new file mode 100644
+index 0000000..840d095
+--- /dev/null
++++ b/pkg/util/version/BUILD.bazel
+@@ -0,0 +1,17 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "doc.go",
++        "version.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/util/version",
++    visibility = ["//visibility:public"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["version_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/util/wait/BUILD.bazel b/pkg/util/wait/BUILD.bazel
+new file mode 100644
+index 0000000..4c66618
+--- /dev/null
++++ b/pkg/util/wait/BUILD.bazel
+@@ -0,0 +1,25 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "doc.go",
++        "wait.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/util/wait",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/util/clock:go_default_library",
++        "//pkg/util/runtime:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["wait_test.go"],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/util/clock:go_default_library",
++        "//pkg/util/runtime:go_default_library",
++    ],
++)
+diff --git a/pkg/util/waitgroup/BUILD.bazel b/pkg/util/waitgroup/BUILD.bazel
+new file mode 100644
+index 0000000..f06d0ef
+--- /dev/null
++++ b/pkg/util/waitgroup/BUILD.bazel
+@@ -0,0 +1,17 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "doc.go",
++        "waitgroup.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/util/waitgroup",
++    visibility = ["//visibility:public"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["waitgroup_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/util/yaml/BUILD.bazel b/pkg/util/yaml/BUILD.bazel
+new file mode 100644
+index 0000000..ec77905
+--- /dev/null
++++ b/pkg/util/yaml/BUILD.bazel
+@@ -0,0 +1,18 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["decoder.go"],
++    importpath = "k8s.io/apimachinery/pkg/util/yaml",
++    visibility = ["//visibility:public"],
++    deps = [
++        "@io_k8s_klog//:go_default_library",
++        "@io_k8s_sigs_yaml//:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["decoder_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/version/BUILD.bazel b/pkg/version/BUILD.bazel
+new file mode 100644
+index 0000000..7c9c621
+--- /dev/null
++++ b/pkg/version/BUILD.bazel
+@@ -0,0 +1,18 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "doc.go",
++        "helpers.go",
++        "types.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/version",
++    visibility = ["//visibility:public"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["helpers_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/pkg/watch/BUILD.bazel b/pkg/watch/BUILD.bazel
+new file mode 100644
+index 0000000..262255a
+--- /dev/null
++++ b/pkg/watch/BUILD.bazel
+@@ -0,0 +1,38 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = [
++        "doc.go",
++        "filter.go",
++        "mux.go",
++        "streamwatcher.go",
++        "watch.go",
++        "zz_generated.deepcopy.go",
++    ],
++    importpath = "k8s.io/apimachinery/pkg/watch",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/util/net:go_default_library",
++        "//pkg/util/runtime:go_default_library",
++        "@io_k8s_klog//:go_default_library",
++    ],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = [
++        "filter_test.go",
++        "mux_test.go",
++        "streamwatcher_test.go",
++        "watch_test.go",
++    ],
++    embed = [":go_default_library"],
++    deps = [
++        "//pkg/runtime:go_default_library",
++        "//pkg/runtime/schema:go_default_library",
++        "//pkg/util/wait:go_default_library",
++    ],
++)
+diff --git a/third_party/forked/golang/json/BUILD.bazel b/third_party/forked/golang/json/BUILD.bazel
+new file mode 100644
+index 0000000..8c78b75
+--- /dev/null
++++ b/third_party/forked/golang/json/BUILD.bazel
+@@ -0,0 +1,14 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["fields.go"],
++    importpath = "k8s.io/apimachinery/third_party/forked/golang/json",
++    visibility = ["//visibility:public"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["fields_test.go"],
++    embed = [":go_default_library"],
++)
+diff --git a/third_party/forked/golang/netutil/BUILD.bazel b/third_party/forked/golang/netutil/BUILD.bazel
+new file mode 100644
+index 0000000..6a65876
+--- /dev/null
++++ b/third_party/forked/golang/netutil/BUILD.bazel
+@@ -0,0 +1,8 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["addr.go"],
++    importpath = "k8s.io/apimachinery/third_party/forked/golang/netutil",
++    visibility = ["//visibility:public"],
++)
+diff --git a/third_party/forked/golang/reflect/BUILD.bazel b/third_party/forked/golang/reflect/BUILD.bazel
+new file mode 100644
+index 0000000..d6455fc
+--- /dev/null
++++ b/third_party/forked/golang/reflect/BUILD.bazel
+@@ -0,0 +1,14 @@
++load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++
++go_library(
++    name = "go_default_library",
++    srcs = ["deep_equal.go"],
++    importpath = "k8s.io/apimachinery/third_party/forked/golang/reflect",
++    visibility = ["//visibility:public"],
++)
++
++go_test(
++    name = "go_default_test",
++    srcs = ["deep_equal_test.go"],
++    embed = [":go_default_library"],
++)

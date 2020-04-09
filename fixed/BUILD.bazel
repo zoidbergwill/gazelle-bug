@@ -1,0 +1,30 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@bazel_gazelle//:def.bzl", "gazelle")
+
+exports_files(
+    glob(["patches/*"]),
+    visibility = ["//:__subpackages__"],
+)
+
+# gazelle:prefix github.com/example/project
+gazelle(name = "gazelle")
+
+# gazelle fixes
+# gazelle:resolve go k8s.io/apimachinery/pkg/runtime @io_k8s_api//pkg/runtime:go_default_library
+
+go_library(
+    name = "go_default_library",
+    srcs = ["main.go"],
+    importpath = "github.com/example/project",
+    visibility = ["//visibility:private"],
+    deps = [
+        "@io_k8s_api//core/v1:go_default_library",
+        "@io_k8s_apimachinery//pkg/apis/meta/v1:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "project",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
+)

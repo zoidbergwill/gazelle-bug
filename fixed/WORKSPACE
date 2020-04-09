@@ -1,0 +1,187 @@
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "io_bazel_rules_go",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.22.2/rules_go-v0.22.2.tar.gz",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.22.2/rules_go-v0.22.2.tar.gz",
+    ],
+    sha256 = "142dd33e38b563605f0d20e89d9ef9eda0fc3cb539a14be1bdb1350de2eda659",
+)
+
+load("@io_bazel_rules_go//go:deps.bzl", "go_rules_dependencies", "go_register_toolchains")
+
+go_rules_dependencies()
+
+go_register_toolchains()
+
+http_archive(
+    name = "bazel_gazelle",
+    urls = [
+        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/bazel-gazelle/releases/download/v0.20.0/bazel-gazelle-v0.20.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.20.0/bazel-gazelle-v0.20.0.tar.gz",
+    ],
+    sha256 = "d8c45ee70ec39a57e7a05e5027c32b1576cc7f16d9dd37135b0eddde45cf1b10",
+)
+
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
+
+gazelle_dependencies()
+
+git_repository(
+    name = "com_google_protobuf",
+    commit = "09745575a923640154bcf307fba8aedff47f240a",
+    remote = "https://github.com/protocolbuffers/protobuf",
+    shallow_since = "1558721209 -0700",
+)
+
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+
+protobuf_deps()
+
+git_repository(
+    name = "io_k8s_apimachinery",
+    remote = "https://github.com/kubernetes/apimachinery",
+    # Drop commit and shallow_since and uncomment this to update
+    # branch = "master",
+    commit = "c01355f0e8967eafb78c7acb477e2568526ab821",
+    shallow_since = "1586398286 +0000",
+    patches = [
+        "//:patches/gazelle-files-io_k8s_apimachinery.patch",
+    ],
+    patch_args = ["-p1"],
+)
+
+# go_repository(
+#     name = "io_k8s_apimachinery",
+#     importpath = "k8s.io/apimachinery",
+#     sum = "h1:hKPYcQRPLQoG2e7fKkVl0YCvm9TBefXTfGILa9vjVVk=",
+#     version = "v0.18.1",
+#     # commit = "f2f3a405f61d",
+# )
+
+git_repository(
+    name = "io_k8s_api",
+    remote = "https://github.com/kubernetes/api",
+    # Drop commit and shallow_since and uncomment this to update
+    # branch = "master",
+    commit = "0200c590acbda553352b033ea28a8bacd1a20812",
+    shallow_since = "1586398397 +0000",
+    patches = [
+        "//:patches/gazelle-files-io_k8s_api.patch",
+    ],
+    patch_args = ["-p1"],
+)
+# go_repository(
+#     name = "io_k8s_api",
+#     importpath = "k8s.io/api",
+#     sum = "h1:pnHr0LH69kvL29eHldoepUDKTuiOejNZI2A1gaxve3Q=",
+#     version = "v0.18.1",
+#     # commit = "3544db3b9e44",
+# )
+
+go_repository(
+    name = "com_github_google_gofuzz",
+    importpath = "github.com/google/gofuzz",
+    sum = "h1:Hsa8mG0dQ46ij8Sl2AYJDUv1oA9/d6Vk+3LG99Oe02g=",
+    version = "v1.1.0",
+)
+
+go_repository(
+    name = "com_github_golang_groupcache",
+    importpath = "github.com/golang/groupcache",
+    sum = "h1:1r7pUrabqp18hOBcwBwiTsbnFeTZHV9eER/QT5JVZxY=",
+    version = "v0.0.0-20200121045136-8c9f03a8e57e",
+)
+
+go_repository(
+    name = "com_github_docker_spdystream",
+    importpath = "github.com/docker/spdystream",
+    sum = "h1:ZfSZ3P3BedhKGUhzj7BQlPSU4OvT6tfOKe3DVHzOA7s=",
+    version = "v0.0.0-20181023171402-6480d4af844c",
+)
+
+go_repository(
+    name = "com_github_elazarl_goproxy",
+    importpath = "github.com/elazarl/goproxy",
+    sum = "h1:zPs0fNF2Io1Qytf92EI2CDJ9oCXZr+NmjEVexrUEdq4=",
+    version = "v0.0.0-20200315184450-1f3cb6622dad",
+)
+
+go_repository(
+    name = "com_github_mxk_go_flowrate",
+    importpath = "github.com/mxk/go-flowrate",
+    sum = "h1:y5//uYreIhSUg3J1GEMiLbxo1LJaP8RfCpH6pymGZus=",
+    version = "v0.0.0-20140419014527-cca7078d478f",
+)
+
+go_repository(
+    name = "org_golang_x_net",
+    importpath = "golang.org/x/net",
+    sum = "h1:3G+cUijn7XD+S4eJFddp53Pv7+slrESplyjG25HgL+k=",
+    version = "v0.0.0-20200324143707-d3edc9973b7e",
+)
+
+go_repository(
+    name = "io_k8s_kube_openapi",
+    importpath = "k8s.io/kube-openapi",
+    sum = "h1:FDWYFE3itI1G8UFOMjUuLbROZExo+Rrfm/Qaf473rm4=",
+    version = "v0.0.0-20200403204345-e1beb1bd0f35",
+)
+
+go_repository(
+    name = "io_k8s_klog",
+    importpath = "k8s.io/klog",
+    sum = "h1:Pt+yjF5aB1xDSVbau4VsWe+dQNzA0qv1LlXdC2dF6Q8=",
+    version = "v1.0.0",
+)
+
+go_repository(
+    name = "in_gopkg_inf_v0",
+    importpath = "gopkg.in/inf.v0",
+    sum = "h1:73M5CoZyi3ZLMOyDlQh031Cx6N9NDJ2Vvfl76EDAgDc=",
+    version = "v0.9.1",
+)
+
+go_repository(
+    name = "io_k8s_sigs_structured_merge_diff_v3",
+    importpath = "sigs.k8s.io/structured-merge-diff/v3",
+    sum = "h1:dOmIZBMfhcHS09XZkMyUgkq5trg3/jRyJYFZUiaOp8E=",
+    version = "v3.0.0",
+)
+
+go_repository(
+    name = "in_gopkg_yaml_v2",
+    importpath = "gopkg.in/yaml.v2",
+    sum = "h1:obN1ZagJSUGI0Ek/LBmuj4SNLPfIny3KsKFopxRdj10=",
+    version = "v2.2.8",
+)
+
+go_repository(
+    name = "com_github_json_iterator_go",
+    importpath = "github.com/json-iterator/go",
+    sum = "h1:9yzud/Ht36ygwatGx56VwCZtlI/2AD15T1X2sjSuGns=",
+    version = "v1.1.9",
+)
+
+go_repository(
+    name = "org_golang_x_text",
+    importpath = "golang.org/x/text",
+    sum = "h1:tW2bmiBqwgJj/UpqtC8EpXEZVYOwU0yG4iWbprSVAcs=",
+    version = "v0.3.2",
+)
+
+go_repository(
+    name = "com_github_modern_go_concurrent",
+    importpath = "github.com/modern-go/concurrent",
+    sum = "h1:TRLaZ9cD/w8PVh93nsPXa1VrQ6jlwL5oN8l14QlcNfg=",
+    version = "v0.0.0-20180306012644-bacd9c7ef1dd",
+)
+
+go_repository(
+    name = "com_github_modern_go_reflect2",
+    importpath = "github.com/modern-go/reflect2",
+    sum = "h1:9f412s+6RmYXLWZSEzVVgPGK7C2PphHj5RJrvfx9AWI=",
+    version = "v1.0.1",
+)
