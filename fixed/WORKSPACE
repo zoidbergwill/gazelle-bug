@@ -40,46 +40,25 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()
 
-git_repository(
+go_repository(
     name = "io_k8s_apimachinery",
-    remote = "https://github.com/kubernetes/apimachinery",
-    # Drop commit and shallow_since and uncomment this to update
-    # branch = "master",
-    commit = "c01355f0e8967eafb78c7acb477e2568526ab821",
-    shallow_since = "1586398286 +0000",
-    patches = [
-        "//:patches/gazelle-files-io_k8s_apimachinery.patch",
+    importpath = "k8s.io/apimachinery",
+    sum = "h1:hKPYcQRPLQoG2e7fKkVl0YCvm9TBefXTfGILa9vjVVk=",
+    version = "v0.18.1",
+    build_directives = [
+        "gazelle:proto disable"
     ],
-    patch_args = ["-p1"],
 )
 
-# go_repository(
-#     name = "io_k8s_apimachinery",
-#     importpath = "k8s.io/apimachinery",
-#     sum = "h1:hKPYcQRPLQoG2e7fKkVl0YCvm9TBefXTfGILa9vjVVk=",
-#     version = "v0.18.1",
-#     # commit = "f2f3a405f61d",
-# )
-
-git_repository(
+go_repository(
     name = "io_k8s_api",
-    remote = "https://github.com/kubernetes/api",
-    # Drop commit and shallow_since and uncomment this to update
-    # branch = "master",
-    commit = "0200c590acbda553352b033ea28a8bacd1a20812",
-    shallow_since = "1586398397 +0000",
-    patches = [
-        "//:patches/gazelle-files-io_k8s_api.patch",
+    importpath = "k8s.io/api",
+    sum = "h1:pnHr0LH69kvL29eHldoepUDKTuiOejNZI2A1gaxve3Q=",
+    version = "v0.18.1",
+    build_directives = [
+        "gazelle:proto disable"
     ],
-    patch_args = ["-p1"],
 )
-# go_repository(
-#     name = "io_k8s_api",
-#     importpath = "k8s.io/api",
-#     sum = "h1:pnHr0LH69kvL29eHldoepUDKTuiOejNZI2A1gaxve3Q=",
-#     version = "v0.18.1",
-#     # commit = "3544db3b9e44",
-# )
 
 go_repository(
     name = "com_github_google_gofuzz",

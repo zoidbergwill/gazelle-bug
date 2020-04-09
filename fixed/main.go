@@ -8,8 +8,8 @@ import (
 )
 
 func main() {
-	fmt.Printf("%+v", v1.PodList)
-	fmt.Printf("%+v", metav1.ListOptions{})
+	fmt.Printf("%+v\n", v1.PodList{})
+	fmt.Printf("%+v\n", metav1.ListOptions{})
 }
 
 
